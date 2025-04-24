@@ -2,15 +2,40 @@
 let grammerInput, grammerButton;
 let expressionInput, expressionButton;
 
-let totalRows;
-let actionColumns, goToColumns;
+let totalRows = 13;
+let actionColumns = 6;
+let goToColumns = 3;
 
-let grammar = [];
+let grammar = [
+  {num: "1", lhs: "E", rhs: ["E", "+", "T"], rhsCount: 3},
+  {num: "2", lhs: "E", rhs: ["T"], rhsCount: 1},
+  {num: "3", lhs: "T", rhs: ["T", "*", "F"], rhsCount: 3},
+  {num: "4", lhs: "T", rhs: ["F"], rhsCount: 1},
+  {num: "5", lhs: "F", rhs: ["(", "E", ")"], rhsCount: 3},
+  {num: "6", lhs: "F", rhs: ["id"], rhsCount: 1},
+];
 
-let actionArray = [];
-let goToArray = [];
+let actionArray = ["id", "+", "*", "(", ")", "$"];
+let goToArray = ["E", "T", "F"];
 
-let SRPGrid = [];
+
+
+let SRPGrid = [
+  { E: "1", T: "2", F: "3", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "s6", "*": "", ")": "", $: "acc" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "r2", "*": "s7", ")": "r2", $: "r2" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "r4", "*": "r4", ")": "r4", $: "r4" },
+  { E: "8", T: "2", F: "3", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "r6", "*": "r6", ")": "r6", $: "r6" },
+  { E: "", T: "9", F: "3", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
+  { E: "", T: "", F: "10", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "s6", "*": "", ")": "s11", $: "" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "r1", "*": "s7", ")": "r1", $: "r1" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "r3", "*": "r3", ")": "r3", $: "r3" },
+  { E: "", T: "", F: "", "(": "", id: "", "+": "r5", "*": "r5", ")": "r5", $: "r5" }
+];
+
+console.table(SRPGrid);
 
 let stack = ["0", ];
 
@@ -417,6 +442,7 @@ function itemExistsInSet(set, item) {
 }
 
 function calculateGrid(states, transitions) {
+  console.log("calc grid called");
   SRPGrid = [];
 
   const firstTerminals = getFirstTerminalsOfRules();
@@ -456,9 +482,10 @@ function calculateGrid(states, transitions) {
     });
 
     SRPGrid.push(row);
+    
   });
-
-  logSRPGrid(SRPGrid, actionArray, goToArray);
+  console.log(SRPGrid);
+  //logSRPGrid(SRPGrid, actionArray, goToArray);
 }
 
 function getFirstTerminalsOfRules() {
@@ -478,7 +505,6 @@ function getFirstTerminalsOfRules() {
 
 
 function logSRPGrid(SRPGrid, terminals, nonTerminals) {
-  const headers = ["State", ...terminals, ...nonTerminals];
   let table = [];
 
   for (let i = 0; i < SRPGrid.length; i++) {
