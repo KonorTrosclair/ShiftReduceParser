@@ -1,6 +1,7 @@
 //global variables
 let grammerInput, grammerButton;
 let expressionInput, expressionButton;
+let nextStepButton;
 
 let totalRows = 13;
 let actionColumns = 6;
@@ -21,18 +22,18 @@ let goToArray = ["E", "T", "F"];
 
 
 let SRPGrid = [
-  { E: "1", T: "2", F: "3", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "s6", "*": "", ")": "", $: "acc" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "r2", "*": "s7", ")": "r2", $: "r2" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "r4", "*": "r4", ")": "r4", $: "r4" },
-  { E: "8", T: "2", F: "3", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "r6", "*": "r6", ")": "r6", $: "r6" },
-  { E: "", T: "9", F: "3", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
-  { E: "", T: "", F: "10", "(": "s4", id: "s5", "+": "", "*": "", ")": "", $: "" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "s6", "*": "", ")": "s11", $: "" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "r1", "*": "s7", ")": "r1", $: "r1" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "r3", "*": "r3", ")": "r3", $: "r3" },
-  { E: "", T: "", F: "", "(": "", id: "", "+": "r5", "*": "r5", ")": "r5", $: "r5" }
+  { E: "1", T: "2", F: "3",  "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "s6", "*": "",   ")": "",    $: "acc" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r2", "*": "s7", ")": "r2",  $: "r2" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r4", "*": "r4", ")": "r4",  $: "r4" },
+  { E: "8", T: "2", F: "3",  "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r6", "*": "r6", ")": "r6",  $: "r6" },
+  { E: "",  T: "9", F: "3",  "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
+  { E: "",  T: "",  F: "10", "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "s6", "*": "",   ")": "s11", $: "" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r1", "*": "s7", ")": "r1",  $: "r1" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r3", "*": "r3", ")": "r3",  $: "r3" },
+  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r5", "*": "r5", ")": "r5",  $: "r5" }
 ];
 
 console.table(SRPGrid);
@@ -78,6 +79,10 @@ function setup() {
   expressionButton.size(213, 20);
   expressionButton.mousePressed(parse);
   expressionButton.style('background-color', '#4CAF50');
+
+  nextStepButton = createButton('Next Step');
+  nextStepButton.position(1260, 730);
+  nextStepButton.mousePressed(stepThroughTokens);
 
   textAlign(CENTER, CENTER);
 
@@ -305,7 +310,7 @@ function calculateStates() {
   };
 
   let states = [];
-  let transitions = []; // optional: to record transitions
+  let transitions = [];
 
   let startState = closure([augmentedStart]);
   states.push(startState);
@@ -550,7 +555,7 @@ function parse() {
   let expression = expressionInput.value(); //gets the expression from the input box
   tokens = expression.match(/\w+|[^\s\w]/g); //splits the expression into tokens by dividing by whitespase
 
-  setTimeout(stepThroughTokens, 100); // Start stepping through the tokens
+  //setTimeout(stepThroughTokens, 100); // Start stepping through the tokens
 }
 
 // recursive function to ensure that each step is 1 second apart
@@ -619,7 +624,7 @@ function stepThroughTokens() {
   currentTokenIndex++; //go to the next token
 
   //proccess the next step after 1.5 seconds
-  setTimeout(stepThroughTokens, 1500);
+  //setTimeout(stepThroughTokens, 1500);
 }
 
 
