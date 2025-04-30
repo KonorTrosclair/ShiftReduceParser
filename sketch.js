@@ -309,10 +309,11 @@ function step() {
       stack.push(parseInt(action.substring(1))); //we also push the number after it to the stack for future parsing
     }
     else if (action[0] === "r") { //detects reduction by getting the first character
-      reduce(parseInt(action.substring(1))); //calls reduce function
+      let validReduction = false;
+      validReduction = reduce(parseInt(action.substring(1))); //calls reduce function
 
       // Goto highlight (based on reduction)
-      if (SRPGrid[previouseState] && SRPGrid[previouseState][goToToken] !== undefined) { //takes advantage of short circuit evaluation (from class)
+      if (validReduction && SRPGrid[previouseState] && SRPGrid[previouseState][goToToken] !== undefined) { //takes advantage of short circuit evaluation (from class)
         action = SRPGrid[previouseState][goToToken];
         stack.push(parseInt(action));
 
@@ -350,14 +351,22 @@ function step() {
 
 
 function reduce(ruleNum) {
+  let rhs; //gets the right had side of the rule for example "E -> E + id" (rhs = "E + id")
+  let matched = true; //sets a flag that determines if a match to the rhs was found
+  let matchedRule;
   for (let rule of grammar) {
-    let rhs = rule.rhs; //gets the right had side of the rule for example "E -> E + id" (rhs = "E + id")
-    let matched = true; //sets a flag that determines if a match to the rhs was found
+    if (parseInt(rule.num) == ruleNum) {
+      rhs = rule.rhs;
+      matchedRule = rule;
+      console.log("rhs: ", rhs);
+      break;
+    }
+  } 
     //let tempString = ""; //sets a temporary string that only stores characters like "id" and "E" as well as opperands like "+" and "-"
 
     // Check top of stack for a match with this rule's RHS
     for (let i = stack.length - 2, j = rhs.length - 1; j >= 0; i -= 2, j--) {
-      if ((i < 0 || stack[i] !== rhs[j]) && ruleNum !== rule.num) { //no match found
+      if ((i < 0 || stack[i] !== rhs[j])) { //no match found
         matched = false;
         break;
       }
@@ -368,7 +377,7 @@ function reduce(ruleNum) {
       // console.log("Matched Rule: ", rule.lhs, "->", rule.rhs.join(" "));
       // console.log("Matched string: ", tempString);
 
-      currentRuleNum = rule.num; //get the matched rule number
+      currentRuleNum = ruleNum; //get the matched rule number
 
       // removes the rhs rule from the stack loops for double the length of rhs
       for (let k = 0; k < rhs.length * 2; k++) {
@@ -377,13 +386,16 @@ function reduce(ruleNum) {
 
       // Now find state under the top
       let stateBeforeRHS = stack[stack.length - 1]; //now that stack is popped the state equals the number brefore the RHS
-      goToToken = rule.lhs; //set the goTO token to be the LHS of the RHS
+      goToToken = matchedRule.lhs; //set the goTO token to be the LHS of the RHS
       previouseState = stateBeforeRHS; //sets global variable previous state
 
       // Push LHS and next state (will be looked up right after reduce)
       stack.push(goToToken); // push LHS
+      return true;
+    } else {
+      return false;
     }
-  }
+
 }
 
 
