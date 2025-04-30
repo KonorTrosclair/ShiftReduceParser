@@ -22,18 +22,18 @@ let goToArray = ["E", "T", "F"];
 
 
 let SRPGrid = [
-  { E: "1", T: "2", F: "3",  "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "s6", "*": "",   ")": "",    $: "acc" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r2", "*": "s7", ")": "r2",  $: "r2" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r4", "*": "r4", ")": "r4",  $: "r4" },
-  { E: "8", T: "2", F: "3",  "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r6", "*": "r6", ")": "r6",  $: "r6" },
-  { E: "",  T: "9", F: "3",  "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
-  { E: "",  T: "",  F: "10", "(": "s4", id: "s5", "+": "",   "*": "",   ")": "",    $: "" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "s6", "*": "",   ")": "s11", $: "" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r1", "*": "s7", ")": "r1",  $: "r1" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r3", "*": "r3", ")": "r3",  $: "r3" },
-  { E: "",  T: "",  F: "",   "(": "",   id: "",   "+": "r5", "*": "r5", ")": "r5",  $: "r5" }
+  { E: "1", T: "2", F: "3",  "(": "s4", id: "s5", "+": undefined,   "*": undefined,   ")": undefined,    $: undefined },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "s6", "*": undefined,   ")": undefined,    $: "acc" },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "r2", "*": "s7", ")": "r2",  $: "r2" },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "r4", "*": "r4", ")": "r4",  $: "r4" },
+  { E: "8", T: "2", F: "3",  "(": "s4", id: "s5", "+": undefined,   "*": undefined,   ")": undefined,    $: undefined },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "r6", "*": "r6", ")": "r6",  $: "r6" },
+  { E: undefined,  T: "9", F: "3",  "(": "s4", id: "s5", "+": undefined,   "*": undefined,   ")": undefined,    $: undefined },
+  { E: undefined,  T: undefined,  F: "10", "(": "s4", id: "s5", "+": undefined,   "*": undefined,   ")": undefined,    $: undefined },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "s6", "*": undefined,   ")": "s11", $: undefined },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "r1", "*": "s7", ")": "r1",  $: "r1" },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "r3", "*": "r3", ")": "r3",  $: "r3" },
+  { E: undefined,  T: undefined,  F: undefined,   "(": undefined,   id: undefined,   "+": "r5", "*": "r5", ")": "r5",  $: "r5" }
 ];
 
 console.table(SRPGrid);
@@ -236,7 +236,7 @@ function displayExpression() {
 
   text("Expression: ", 1490, 470);
   for(let i = 0; i < tokens.length; i++) {
-    if (i === currentTokenIndex) {
+    if (i === currentToken) {
       fill(0, 255, 0); // Highlight current token
     } else {
       fill(0);
@@ -264,31 +264,36 @@ let highlightedIsGoto = false;
 let improperSyntax = false;
 
 
-let currentTokenIndex = 0;
+let currentToken = 0;
 
 function parse() {
   improperSyntax = false; //ensures that impropersyntax is reset to false at the click of "submit expression" button
   stack = ["0"]; // sets stack to start at 0 "resets stack"
-  currentTokenIndex = 0; //esures the current token index is reset to 0
+  currentToken = 0; //esures the current token index is reset to 0
   let expression = expressionInput.value(); //gets the expression from the input box
-  tokens = expression.match(/\w+|[^\s\w]/g); //splits the expression into tokens by dividing by whitespase
+  tokens = expression.match(/\w+|[^\s\w]/g); //splits the expression into tokens
+
+  actionHighlightedRow = -1;
+  actionHighlightedColumn = -1;
+  goToHighlightedRow = -1;
+  goToHighlightedColumn = -1;
 
   //setTimeout(stepThroughTokens, 100); // Start stepping through the tokens
 }
 
-// recursive function to ensure that each step is 1 second apart
+// recursive function to ensure that each step occurs independently waiting on button press for next step
 function stepThroughTokens() {
   currentRuleNum = -1;
 
-  // Ends the timed loop if we reach the end of the tokens
-  if (currentTokenIndex >= tokens.length) {
-    logStack(stack);
-    return;
-  }
+  // Ends the timed loop if we reach the end of the tokens (used onyl for setTimeout)
+  // if (currentToken >= tokens.length) {
+  //   logStack(stack);
+  //   return;
+  // }
 
   let parsingRow = stack[stack.length - 1]; //since the stack always has a number at the top we take that and make it the current row
-  let token = tokens[currentTokenIndex]; //get the current toke which is the current position in the expression
-  let action = SRPGrid[parsingRow]?.[token]; //actions are either "undefined" (error) or contain "s" (shift) or "r" (reduce) or "acc" (accept) 
+  let token = tokens[currentToken]; //get the current token which is the current position in the expression
+  let action = SRPGrid[parsingRow]?.[token]; //actions are either "undefined" (error) or contain "s" (shift) or "r" (reduce) or "acc" (accept) (gets row at current token)
   // console.log("Parsing Row: ", parsingRow);
   // console.log("Token: ", token);
   // console.log("Action: ", action);
@@ -307,7 +312,7 @@ function stepThroughTokens() {
       reduce(); //calls reduce function
 
       // Goto highlight (based on reduction)
-      if (SRPGrid[previouseState] && SRPGrid[previouseState][goToToken] !== undefined) {
+      if (SRPGrid[previouseState] && SRPGrid[previouseState][goToToken] !== undefined) { //takes advantage of short circuit evaluation (from class)
         action = SRPGrid[previouseState][goToToken];
         stack.push(parseInt(action));
 
@@ -320,12 +325,11 @@ function stepThroughTokens() {
         // console.log("Goto Hilighted Column: ", goToHighlightedColumn);
     
       } else {
-        console.error("Invalid goto: SRPGrid[" + previouseState + "][" + goToToken + "] is undefined.");
         improperSyntax = true;
         return;
       }
 
-      currentTokenIndex--; // since we reduce we need to stay on the current token
+      currentToken--; // since we reduce we need to stay on the current token
     }
     else if (action === "acc") { //we finished parsing the expression symbolized by landing on "acc"
       console.log("Accepted");
@@ -334,12 +338,11 @@ function stepThroughTokens() {
     }
   } else { //the action was undefined therefore the is an error in the expression
     improperSyntax = true;
-    console.error("Invalid action: SRPGrid[" + parsingRow + "][" + token + "] is undefined.");
     return;
   }
 
   logStack(stack);
-  currentTokenIndex++; //go to the next token
+  currentToken++; //go to the next token
 
   //proccess the next step after 1.5 seconds
   //setTimeout(stepThroughTokens, 1500);
@@ -369,15 +372,15 @@ function reduce() {
 
       currentRuleNum = rule.num; //get the matched rule number
 
-      // removes the rhs rule from the stack as well as the states "numbers" next to them except the one on the
+      // removes the rhs rule from the stack loops for double the length of rhs
       for (let k = 0; k < rhs.length * 2; k++) {
         stack.pop();
       }
 
       // Now find state under the top
-      let stateBelow = stack[stack.length - 1];
-      goToToken = rule.lhs;
-      previouseState = stateBelow;
+      let stateBeforeRHS = stack[stack.length - 1]; //now that stack is popped the state equals the number brefore the RHS
+      goToToken = rule.lhs; //set the goTO token to be the LHS of the RHS
+      previouseState = stateBeforeRHS; //sets global variable previous state
 
       // Push LHS and next state (will be looked up right after reduce)
       stack.push(goToToken); // push LHS
