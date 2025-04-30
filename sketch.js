@@ -82,7 +82,7 @@ function setup() {
 
   nextStepButton = createButton('Next Step');
   nextStepButton.position(1260, 730);
-  nextStepButton.mousePressed(stepThroughTokens);
+  nextStepButton.mousePressed(step);
 
   textAlign(CENTER, CENTER);
 
@@ -249,7 +249,7 @@ function displayExpression() {
 //#endregion
 
 //#region parsing logic (assignment)
-//global variables for parsing logic
+//global variables
 let previouseState = 0;
 let goToToken = "";
 
@@ -278,11 +278,11 @@ function parse() {
   goToHighlightedRow = -1;
   goToHighlightedColumn = -1;
 
-  //setTimeout(stepThroughTokens, 100); // Start stepping through the tokens
+  //setTimeout(step, 100); // Start stepping through the tokens
 }
 
 // recursive function to ensure that each step occurs independently waiting on button press for next step
-function stepThroughTokens() {
+function step() {
   currentRuleNum = -1;
 
   // Ends the timed loop if we reach the end of the tokens (used onyl for setTimeout)
@@ -309,7 +309,7 @@ function stepThroughTokens() {
       stack.push(parseInt(action.substring(1))); //we also push the number after it to the stack for future parsing
     }
     else if (action[0] === "r") { //detects reduction by getting the first character
-      reduce(); //calls reduce function
+      reduce(parseInt(action.substring(1))); //calls reduce function
 
       // Goto highlight (based on reduction)
       if (SRPGrid[previouseState] && SRPGrid[previouseState][goToToken] !== undefined) { //takes advantage of short circuit evaluation (from class)
@@ -326,7 +326,7 @@ function stepThroughTokens() {
     
       } else {
         improperSyntax = true;
-        return;
+        return; //halt all parcing since we landed on an undefined square in the goto table
       }
 
       currentToken--; // since we reduce we need to stay on the current token
@@ -338,32 +338,30 @@ function stepThroughTokens() {
     }
   } else { //the action was undefined therefore the is an error in the expression
     improperSyntax = true;
-    return;
+    return; //halt all parsing since we landed on an undefined square
   }
 
-  logStack(stack);
+  //logStack(stack);
   currentToken++; //go to the next token
 
   //proccess the next step after 1.5 seconds
-  //setTimeout(stepThroughTokens, 1500);
+  //setTimeout(step, 1500);
 }
 
 
-function reduce() {
+function reduce(ruleNum) {
   for (let rule of grammar) {
     let rhs = rule.rhs; //gets the right had side of the rule for example "E -> E + id" (rhs = "E + id")
     let matched = true; //sets a flag that determines if a match to the rhs was found
     //let tempString = ""; //sets a temporary string that only stores characters like "id" and "E" as well as opperands like "+" and "-"
-    let positions = []; 
 
     // Check top of stack for a match with this rule's RHS
     for (let i = stack.length - 2, j = rhs.length - 1; j >= 0; i -= 2, j--) {
-      if (i < 0 || stack[i] !== rhs[j]) {
+      if ((i < 0 || stack[i] !== rhs[j]) && ruleNum !== rule.num) { //no match found
         matched = false;
         break;
       }
       //tempString = rhs[j] + tempString; //appends the temporary string 
-      positions.unshift(i); //adds the position of in the stack, marked by i, to the begining of the positions array
     }
 
     if (matched) { //if a match was found pop the rhs rule from the stack for example stack: 0 E 1 + 3 id 4 --> stack: 0 E 1
@@ -384,7 +382,6 @@ function reduce() {
 
       // Push LHS and next state (will be looked up right after reduce)
       stack.push(goToToken); // push LHS
-      return; // done with reduction
     }
   }
 }
