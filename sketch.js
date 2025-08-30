@@ -271,7 +271,7 @@ function parse() {
   stack = ["0"]; // sets stack to start at 0 "resets stack"
   currentToken = 0; //esures the current token index is reset to 0
   let expression = expressionInput.value(); //gets the expression from the input box
-  tokens = expression.match(/\w+|[^\s\w]/g); //splits the expression into tokens
+  tokens = expression.split(" "); //splits the expression into tokens
 
   actionHighlightedRow = -1;
   actionHighlightedColumn = -1;
@@ -281,36 +281,32 @@ function parse() {
   //setTimeout(step, 100); // Start stepping through the tokens
 }
 
-// recursive function to ensure that each step occurs independently waiting on button press for next step
+
 function step() {
   currentRuleNum = -1;
 
-  // Ends the timed loop if we reach the end of the tokens (used onyl for setTimeout)
-  // if (currentToken >= tokens.length) {
-  //   logStack(stack);
-  //   return;
-  // }
+  
 
-  let parsingRow = stack[stack.length - 1]; //since the stack always has a number at the top we take that and make it the current row
-  let token = tokens[currentToken]; //get the current token which is the current position in the expression
-  let action = SRPGrid[parsingRow]?.[token]; //actions are either "undefined" (error) or contain "s" (shift) or "r" (reduce) or "acc" (accept) (gets row at current token)
+  let parsingRow = stack[stack.length - 1]; 
+  let token = tokens[currentToken]; 
+  let action = SRPGrid[parsingRow]?.[token]; 
   // console.log("Parsing Row: ", parsingRow);
   // console.log("Token: ", token);
   // console.log("Action: ", action);
 
-  //marks the current row and column for marking the current position in the draw grid function
+ 
   actionHighlightedRow = parseInt(parsingRow); 
   actionHighlightedColumn = actionArray.indexOf(token);
   highlightedIsGoto = false;
 
-  if (action !== undefined) { //ensures that the action is defined (meaning no error in parsing)
-    if (action[0] === "s") { //detects shift by getting the first character 
-      stack.push(token); //since its a shift action we just push the token to the stack
-      stack.push(parseInt(action.substring(1))); //we also push the number after it to the stack for future parsing
+  if (action !== undefined) { 
+    if (action[0] === "s") { 
+      stack.push(token); 
+      stack.push(parseInt(action.substring(1))); 
     }
-    else if (action[0] === "r") { //detects reduction by getting the first character
+    else if (action[0] === "r") { 
       let validReduction = false;
-      validReduction = reduce(parseInt(action.substring(1))); //calls reduce function
+      validReduction = reduce(parseInt(action.substring(1))); 
 
       // Goto highlight (based on reduction)
       if (validReduction && SRPGrid[previouseState] && SRPGrid[previouseState][goToToken] !== undefined) { //takes advantage of short circuit evaluation (from class)
@@ -330,7 +326,7 @@ function step() {
         return; //halt all parcing since we landed on an undefined square in the goto table
       }
 
-      currentToken--; // since we reduce we need to stay on the current token
+      currentToken--; 
     }
     else if (action === "acc") { //we finished parsing the expression symbolized by landing on "acc"
       console.log("Accepted");
@@ -344,9 +340,6 @@ function step() {
 
   //logStack(stack);
   currentToken++; //go to the next token
-
-  //proccess the next step after 1.5 seconds
-  //setTimeout(step, 1500);
 }
 
 
@@ -361,8 +354,7 @@ function reduce(ruleNum) {
       console.log("rhs: ", rhs);
       break;
     }
-  } 
-    //let tempString = ""; //sets a temporary string that only stores characters like "id" and "E" as well as opperands like "+" and "-"
+  }
 
     // Check top of stack for a match with this rule's RHS
     for (let i = stack.length - 2, j = rhs.length - 1; j >= 0; i -= 2, j--) {
@@ -370,7 +362,7 @@ function reduce(ruleNum) {
         matched = false;
         break;
       }
-      //tempString = rhs[j] + tempString; //appends the temporary string 
+      
     }
 
     if (matched) { //if a match was found pop the rhs rule from the stack for example stack: 0 E 1 + 3 id 4 --> stack: 0 E 1
